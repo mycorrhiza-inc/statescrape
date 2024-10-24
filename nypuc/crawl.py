@@ -54,8 +54,8 @@ def extractRows(driver, graph, case):
         href = link.get_attribute('href')
         print(f"href: {href}")
         # skip if the filing has already been indexed
-        if graph.pages[href].visited:
-            continue
+        # if graph.pages[href].visited:
+        #     continue
 
         filing_item = RowData(
             serial=cells[0].text,
@@ -88,6 +88,7 @@ def processURL(driver, url):
 
 def waitForLoad(driver):
     max_wait = 60
+    print("waiting for page to load")
     for i in range(max_wait):
         overlay = driver.find_element(
             By.ID,
@@ -141,6 +142,7 @@ class Page:
         #     cls.graph.addLink(link)
 
         caseId = cls.caseID()
+        print(f"Have CaseID: {caseId}")
         if caseId is not None:
             rowData = extractRows(defaultDriver, cls.graph, case=caseId)
             cls.graph.addCase(caseId, rowData)
@@ -213,7 +215,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="selenium based \
                                      NYPUC case parser")
     # Add flags/arguments
-    parser.add_argument('-o', '--outout', type=str,
+    parser.add_argument('-o', '--output', type=str,
                         help='json file to save the data')
     parser.add_argument('-i', '--input', type=str,
                         help='Specify the input cases')
@@ -226,18 +228,19 @@ if __name__ == '__main__':
 # Use the flags in your script
 
     graph = SiteGraph()
-    if args.input:
-        graph.LoadSiteState(args.input)
-    else:
+    cases = ["18-M-0084"]
+    # if args.cases:
+    #     caseCodes = args.cases.split(',')
+    #     for cc in caseCodes:
+    #         cases.append(
+    #             f"https://documents.dps.ny.gov/public/MatterManagement/CaseMaster.aspx?MatterCaseNo={cc}")
+    #     graph.Seed(cases)
 
-    cases = []
-
-    if args.cases:
-        caseCodes = args.cases.split(',')
-        for cc in caseCodes:
-            cases.append(
-                f"https://documents.dps.ny.gov/public/MatterManagement/CaseMaster.aspx?MatterCaseNo={cc}")
-        graph.Seed(cases)
+    
+    for case in cases:
+            graph.addLink(
+                f"https://documents.dps.ny.gov/public/MatterManagement/CaseMaster.aspx?MatterCaseNo={case}")
+    
 
     graph.Crawl()
 
