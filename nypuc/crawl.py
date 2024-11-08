@@ -16,8 +16,17 @@ pageData = {}
 
 
 class RowData:
-    def __init__(cls, serial, date_filed, nypuc_doctype, name, url, organization,
-                 itemNo, file_name):
+    def __init__(
+        cls,
+        serial,
+        date_filed,
+        nypuc_doctype,
+        name,
+        url,
+        organization,
+        itemNo,
+        file_name,
+    ):
         cls.serial = serial
         cls.date_filed = date_filed
         cls.nypuc_doctype = nypuc_doctype
@@ -51,7 +60,7 @@ def extractRows(driver, graph, case):
         link = linkcell.find_element(By.TAG_NAME, "a")
         print(f"link: {link}")
         name = link.text
-        href = link.get_attribute('href')
+        href = link.get_attribute("href")
         print(f"href: {href}")
         # skip if the filing has already been indexed
         # if graph.pages[href].visited:
@@ -76,11 +85,12 @@ def extractRows(driver, graph, case):
 def processURL(driver, url):
     time.sleep(6)
     # Find all <a> tags on the page
-    links = driver.find_elements(By.TAG_NAME, 'a')
+    links = driver.find_elements(By.TAG_NAME, "a")
     # Extract the href attribute from each link
-    all_links = [link.get_attribute('href') for link in links]
+    all_links = [link.get_attribute("href") for link in links]
 
     return all_links
+
 
 # caseLoaded = "<div id=\"GridPlaceHolder_upUpdatePanelGrd\" \
 # style=\"display: none;\"role=\"status\" aria-hidden=\"true\">"
@@ -90,10 +100,7 @@ def waitForLoad(driver):
     max_wait = 60
     print("waiting for page to load")
     for i in range(max_wait):
-        overlay = driver.find_element(
-            By.ID,
-            "GridPlaceHolder_upUpdatePanelGrd"
-        )
+        overlay = driver.find_element(By.ID, "GridPlaceHolder_upUpdatePanelGrd")
         display = overlay.get_attribute("style")
         if display == "display: none;":
             print("Page Loaded")
@@ -124,7 +131,7 @@ class Page:
         query_params = parse_qs(parsed_url.query)
 
         # Get the value of a specific key (e.g., 'key')
-        key_value = query_params.get('MatterCaseNo', [None])[0]
+        key_value = query_params.get("MatterCaseNo", [None])[0]
         if key_value is None:
             return None
         return key_value
@@ -142,7 +149,7 @@ class Page:
         #     cls.graph.addLink(link)
 
         caseId = cls.caseID()
-        print(f"Have CaseID: {caseId}")
+        # print(f"Have CaseID: {caseId}")
         if caseId is not None:
             rowData = extractRows(defaultDriver, cls.graph, case=caseId)
             cls.graph.addCase(caseId, rowData)
@@ -197,8 +204,8 @@ class SiteGraph:
     def LoadSiteState(cls):
         pass
 
-    def SaveSiteState(cls, filename='links.json'):
-        with open(filename, 'w') as f:
+    def SaveSiteState(cls, filename="links.json"):
+        with open(filename, "w") as f:
             json.dump(cls.caseData, f)
 
     def Seed(cls, urls: List[str]):
@@ -210,22 +217,21 @@ class SiteGraph:
             print(cls.pages[page])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # test : "22-M-0149"
-    parser = argparse.ArgumentParser(description="selenium based \
-                                     NYPUC case parser")
+    parser = argparse.ArgumentParser(
+        description="selenium based \
+                                     NYPUC case parser"
+    )
     # Add flags/arguments
-    parser.add_argument('-o', '--output', type=str,
-                        help='json file to save the data')
-    parser.add_argument('-i', '--input', type=str,
-                        help='Specify the input cases')
-    parser.add_argument('-c', '--cases', type=str,
-                        help='comma separated list of cases')
+    parser.add_argument("-o", "--output", type=str, help="json file to save the data")
+    parser.add_argument("-i", "--input", type=str, help="Specify the input cases")
+    parser.add_argument("-c", "--cases", type=str, help="comma separated list of cases")
 
-# Parse the arguments
+    # Parse the arguments
     args = parser.parse_args()
 
-# Use the flags in your script
+    # Use the flags in your script
 
     graph = SiteGraph()
     cases = ["18-M-0084"]
@@ -236,11 +242,10 @@ if __name__ == '__main__':
     #             f"https://documents.dps.ny.gov/public/MatterManagement/CaseMaster.aspx?MatterCaseNo={cc}")
     #     graph.Seed(cases)
 
-    
     for case in cases:
-            graph.addLink(
-                f"https://documents.dps.ny.gov/public/MatterManagement/CaseMaster.aspx?MatterCaseNo={case}")
-    
+        graph.addLink(
+            f"https://documents.dps.ny.gov/public/MatterManagement/CaseMaster.aspx?MatterCaseNo={case}"
+        )
 
     graph.Crawl()
 
