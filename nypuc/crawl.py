@@ -6,7 +6,7 @@ import argparse
 
 from urllib.parse import urlparse, parse_qs
 
-from typing import List
+from typing import List, Optional
 import time
 import json
 
@@ -26,6 +26,7 @@ class RowData:
         organization,
         itemNo,
         file_name,
+        docket_id,
     ):
         cls.serial = serial
         cls.date_filed = date_filed
@@ -34,6 +35,7 @@ class RowData:
         cls.url = url
         cls.organization = organization
         cls.itemNo = itemNo
+        cls.docket_id = docket_id
         cls.file_name = file_name
 
     def __str__(cls):
@@ -49,6 +51,9 @@ class RowData:
         \tFile Name: {cls.file_name}\n)\n"
 
 
+# class FilingObject(BaseModel):
+#     case : str
+#     filings: List[RowData]
 def extractRows(driver, graph, case):
     table = driver.find_element(By.ID, "tblPubDoc")
     body = table.find_element(By.TAG_NAME, "tbody")
@@ -70,6 +75,7 @@ def extractRows(driver, graph, case):
             serial=cells[0].text,
             date_filed=cells[1].text,
             nypuc_doctype=cells[2].text,
+            docket_id=case,
             name=name,
             url=href,
             organization=cells[4].text,
@@ -79,7 +85,15 @@ def extractRows(driver, graph, case):
 
         filings["filings"].append(filing_item.__dict__)
     print(f"Found filings:\n {filings}")
+    save_filing_object(filings)
     return filings
+
+
+def save_filing_object(filing_object, filename: Optional[str] = None):
+    if filename is None:
+        filename = f'filing-{filing_object["case"]}.json'
+    with open(filename, "w") as f:
+        json.dump(filing_object, f)
 
 
 def processURL(driver, url):
@@ -234,7 +248,7 @@ if __name__ == "__main__":
     # Use the flags in your script
 
     graph = SiteGraph()
-    cases = ["18-M-0084"]
+    cases = ["24-E-0165"]
     # if args.cases:
     #     caseCodes = args.cases.split(',')
     #     for cc in caseCodes:
