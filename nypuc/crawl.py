@@ -280,7 +280,9 @@ if __name__ == "__main__":
     # Use the flags in your script
 
     graph = SiteGraph()
-    cases = ["24-E-0165"]
+    cases = ["18-E-0138"]
+    # Already processed 24-E-0165
+    # To process"", "22-M-0645"
     # if args.cases:
     #     caseCodes = args.cases.split(',')
     #     for cc in caseCodes:
