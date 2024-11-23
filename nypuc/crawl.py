@@ -61,31 +61,40 @@ def extractRows(driver, graph, case):
     rows = body.find_elements(By.TAG_NAME, "tr")
     filings = {"case": case, "filings": []}
     for row in rows:
-        cells = row.find_elements(By.TAG_NAME, "td")
-        linkcell = cells[3]
-        link = linkcell.find_element(By.TAG_NAME, "a")
-        print(f"link: {link}")
-        name = link.text
-        href = link.get_attribute("href")
-        print(f"href: {href}")
-        # skip if the filing has already been indexed
-        # if graph.pages[href].visited:
-        #     continue
+        filing_item = None
+        try:
+            # print(row)
+            cells = row.find_elements(By.TAG_NAME, "td")
+            linkcell = cells[3]
+            link = linkcell.find_element(By.TAG_NAME, "a")
+            # print(f"link: {link}")
+            name = link.text
+            href = link.get_attribute("href")
+            # print(f"href: {href}")
+            # skip if the filing has already been indexed
+            # if graph.pages[href].visited:
+            #     continue
 
-        filing_item = RowData(
-            serial=cells[0].text,
-            date_filed=cells[1].text,
-            nypuc_doctype=cells[2].text,
-            docket_id=case,
-            name=name,
-            url=href,
-            organization=cells[4].text,
-            itemNo=cells[5].text,
-            file_name=cells[6].text,
-        )
-
-        filings["filings"].append(filing_item.__dict__)
-    print(f"Found filings:\n {filings}")
+            filing_item = RowData(
+                serial=cells[0].text,
+                date_filed=cells[1].text,
+                nypuc_doctype=cells[2].text,
+                docket_id=case,
+                name=name,
+                url=href,
+                organization=cells[4].text,
+                itemNo=cells[5].text,
+                file_name=cells[6].text,
+            )
+            filings["filings"].append(filing_item.__dict__)
+        except Exception as e:
+            print(
+                "Encountered a fatal error while processing a row: ",
+                row,
+                "\nencountering error: ",
+                e,
+            )
+    # print(f"Found filings:\n {filings}")
     save_process_filing_object(filings)
     return filings
 
@@ -106,13 +115,16 @@ def verify_docket_id(docket_id: str):
 
     if response.status_code != 200:
         raise Exception(
-            f"Failed to verify docket ID. Status code: {response.status_code}, Response: {response.text}"
+            f"Failed to verify docket ID. Status code: {response.status_code}\nResponse:\n{response.text}"
         )
 
     return response.json()
 
 
 def process_filing_object(filing_object):
+    # assert (
+    #     False
+    # ), "Everything was successfull, not processing the file out of an abundance of caution"
     filings = filing_object["filings"]
     api_url = "https://thaum.kessler.xyz/v1/process-scraped-doc/ny-puc/list"
     response = requests.post(api_url, json=filings)
