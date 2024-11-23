@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
+import requests
 import argparse
 
 
@@ -85,7 +86,7 @@ def extractRows(driver, graph, case):
 
         filings["filings"].append(filing_item.__dict__)
     print(f"Found filings:\n {filings}")
-    save_filing_object(filings)
+    save_process_filing_object(filings)
     return filings
 
 
@@ -94,6 +95,37 @@ def save_filing_object(filing_object, filename: Optional[str] = None):
         filename = f'filing-{filing_object["case"]}.json'
     with open(filename, "w") as f:
         json.dump(filing_object, f)
+
+
+def verify_docket_id(docket_id: str):
+
+    obj = {"docket_id": docket_id}
+    api_url = "https://api.kessler.xyz/v2/public/conversations/verify"
+
+    response = requests.post(api_url, json=obj)
+
+    if response.status_code != 200:
+        raise Exception(
+            f"Failed to verify docket ID. Status code: {response.status_code}, Response: {response.text}"
+        )
+
+    return response.json()
+
+
+def process_filing_object(filing_object):
+    filings = filing_object["filings"]
+    api_url = "https://thaum.kessler.xyz/v1/process-scraped-doc/ny-puc/list"
+    response = requests.post(api_url, json=filings)
+    if response.status_code != 200:
+        raise Exception(
+            f"Failed to process filing object. Status code: {response.status_code}, Response: {response.text}"
+        )
+
+
+def save_process_filing_object(filing_object, filename: Optional[str] = None):
+    verify_docket_id(filing_object["case"])
+    save_filing_object(filing_object, filename)
+    process_filing_object(filing_object)
 
 
 def processURL(driver, url):
