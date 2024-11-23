@@ -126,17 +126,19 @@ def process_filing_object(filing_object):
     #     False
     # ), "Everything was successfull, not processing the file out of an abundance of caution"
     filings = filing_object["filings"]
-    api_url = "https://thaum.kessler.xyz/v1/process-scraped-doc/ny-puc/list"
+    api_url = (
+        "https://thaum.kessler.xyz/v1/process-scraped-doc/ny-puc/list?priority=false"
+    )
     response = requests.post(api_url, json=filings)
-    if response.status_code != 200:
+    if response.status_code != 201:
         raise Exception(
             f"Failed to process filing object. Status code: {response.status_code}, Response: {response.text}"
         )
 
 
 def save_process_filing_object(filing_object, filename: Optional[str] = None):
-    verify_docket_id(filing_object["case"])
     save_filing_object(filing_object, filename)
+    verify_docket_id(filing_object["case"])
     process_filing_object(filing_object)
 
 
@@ -292,9 +294,9 @@ if __name__ == "__main__":
     # Use the flags in your script
 
     graph = SiteGraph()
-    cases = ["18-E-0138"]
-    # Already processed 24-E-0165
-    # To process"", "22-M-0645"
+    cases = ["22-M-0645"]
+    # Already processed 24-E-0165 22-M-0645 18-E-0138
+    # To process:
     # if args.cases:
     #     caseCodes = args.cases.split(',')
     #     for cc in caseCodes:
