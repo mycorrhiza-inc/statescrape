@@ -11,11 +11,11 @@ def extract_docket_ids_regex(html_content: str) -> List[str]:
         html_content (str): HTML string containing the table
 
     Returns:
-        List[str]: List of docket IDs
+        List[str]: List of unique docket IDs
     """
     # Pattern matches: two digits, hyphen, capital letter, hyphen, four digits
     docket_pattern = r"\d{2}-[A-Z]-\d{4}"
-    return re.findall(docket_pattern, html_content)
+    return list(set(re.findall(docket_pattern, html_content)))
 
 
 def process_docket_file(input_path: str, output_path: str) -> None:

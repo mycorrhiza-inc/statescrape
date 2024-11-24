@@ -277,6 +277,12 @@ class SiteGraph:
             print(cls.pages[page])
 
 
+def get_all_cases_from_json(filename: str, after_number: int = 0) -> List[str]:
+    with open(filename, "r") as f:
+        json_data = json.load(f)
+        return json_data[after_number:]
+
+
 if __name__ == "__main__":
     # test : "22-M-0149"
     parser = argparse.ArgumentParser(
@@ -294,7 +300,9 @@ if __name__ == "__main__":
     # Use the flags in your script
 
     graph = SiteGraph()
-    cases = ["22-M-0645"]
+    # cases = ["22-M-0645"]
+    cases = get_all_cases_from_json("output_cases.json", 0)
+
     # Already processed 24-E-0165 22-M-0645 18-E-0138
     # To process:
     # if args.cases:
