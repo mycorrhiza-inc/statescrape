@@ -308,10 +308,20 @@ class SiteGraph:
             print(cls.pages[page])
 
 
-def get_all_cases_from_json(filename: str, after_number: int = 0) -> List[str]:
-    with open(filename, "r") as f:
-        json_data = json.load(f)
-        return json_data[after_number:]
+def get_all_cases_from_json(
+    input_filename: str, exclude_cases_filename: str, after_number: int = 0
+) -> List[str]:
+    with open(input_filename, "r") as f:
+        initial_file_list = json.load(f)
+
+    try:
+        with open(exclude_cases_filename, "r") as f:
+            exclude_cases = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        exclude_cases = []
+
+    filtered_list = [case for case in initial_file_list if case not in exclude_cases]
+    return filtered_list[after_number:]
 
 
 if __name__ == "__main__":
