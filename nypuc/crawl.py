@@ -342,7 +342,11 @@ if __name__ == "__main__":
 
     graph = SiteGraph()
     # cases = ["22-M-0645"]
-    cases = get_all_cases_from_json("output_cases.json", 0)
+    cases = get_all_cases_from_json(
+        input_filename="output_cases.json",
+        exclude_cases_filename="already_processed.jso n",
+        after_number=0,
+    )
 
     # Already processed 24-E-0165 22-M-0645 18-E-0138
     # To process:
