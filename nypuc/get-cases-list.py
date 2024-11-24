@@ -37,38 +37,38 @@ def process_docket_file(input_path: str, output_path: str) -> None:
         json.dump(docket_ids, f, indent=2)
 
 
-def extract_docket_details(html_content: str) -> List[Dict[str, str]]:
-    """
-    Extract docket IDs and their associated information using BeautifulSoup
-
-    Args:
-        html_content (str): HTML string containing the table
-
-    Returns:
-        List[Dict[str, str]]: List of dictionaries containing docket details
-    """
-    soup = BeautifulSoup(html_content, "html.parser")
-    # docket_links = soup.find_all('a', href=lambda x: x and 'MatterSeq' in x)
-    docket_links = soup.find_all("a")
-
-    docket_details = []
-    for link in docket_links:
-        docket_id = link.text.strip()
-        if re.match(r"\d{2}-[A-Z]-\d{4}", docket_id):
-            # Get the parent tr element
-            row = link.find_parent("tr")
-            if row:
-                # Extract additional information from the row
-                details = {
-                    "docket_id": docket_id,
-                    "href": link["href"],
-                    "type": row.find_all("td")[1].text.strip(),
-                    "date": row.find("td", class_="sorting_1").text.strip(),
-                    "description": row.find_all("td")[4].text.strip(),
-                }
-                docket_details.append(details)
-
-    return docket_details
+# def extract_docket_details(html_content: str) -> List[Dict[str, str]]:
+#     """
+#     Extract docket IDs and their associated information using BeautifulSoup
+#
+#     Args:
+#         html_content (str): HTML string containing the table
+#
+#     Returns:
+#         List[Dict[str, str]]: List of dictionaries containing docket details
+#     """
+#     soup = BeautifulSoup(html_content, "html.parser")
+#     # docket_links = soup.find_all('a', href=lambda x: x and 'MatterSeq' in x)
+#     docket_links = soup.find_all("a")
+#
+#     docket_details = []
+#     for link in docket_links:
+#         docket_id = link.text.strip()
+#         if re.match(r"\d{2}-[A-Z]-\d{4}", docket_id):
+#             # Get the parent tr element
+#             row = link.find_parent("tr")
+#             if row:
+#                 # Extract additional information from the row
+#                 details = {
+#                     "docket_id": docket_id,
+#                     "href": link["href"],
+#                     "type": row.find_all("td")[1].text.strip(),
+#                     "date": row.find("td", class_="sorting_1").text.strip(),
+#                     "description": row.find_all("td")[4].text.strip(),
+#                 }
+#                 docket_details.append(details)
+#
+#     return docket_details
 
 
 # Example usage:
