@@ -211,8 +211,37 @@ class Page:
         caseId = cls.caseID()
         # print(f"Have CaseID: {caseId}")
         if caseId is not None:
-            rowData = extractRows(defaultDriver, cls.graph, case=caseId)
-            cls.graph.addCase(caseId, rowData)
+            try:
+                rowData = extractRows(defaultDriver, cls.graph, case=caseId)
+                cls.graph.addCase(caseId, rowData)
+            except Exception as e:
+                # Save errored case ID to list
+                try:
+                    with open("errored_cases.json", "r") as f:
+                        errored_cases = json.load(f)
+                except (FileNotFoundError, json.JSONDecodeError):
+                    errored_cases = []
+
+                if caseId not in errored_cases:
+                    errored_cases.append(caseId)
+
+                with open("errored_cases.json", "w") as f:
+                    json.dump(errored_cases, f)
+
+                # Save detailed error info
+                try:
+                    with open("error_details.json", "r") as f:
+                        error_details = json.load(f)
+                except (FileNotFoundError, json.JSONDecodeError):
+                    error_details = []
+
+                error_details.append(
+                    {"case_id": caseId, "error": str(e), "error_type": type(e).__name__}
+                )
+
+                with open("error_details.json", "w") as f:
+                    json.dump(error_details, f)
+                # Print the error to
 
         cls.visited = True
 
