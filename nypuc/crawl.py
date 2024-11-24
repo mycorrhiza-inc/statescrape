@@ -215,6 +215,8 @@ class Page:
                 rowData = extractRows(defaultDriver, cls.graph, case=caseId)
                 cls.graph.addCase(caseId, rowData)
             except Exception as e:
+                print(f"Error with case {caseId}: {e}\n")
+                print("Saving Error info to files\n")
                 # Save errored case ID to list
                 try:
                     with open("errored_cases.json", "r") as f:
