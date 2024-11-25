@@ -21,40 +21,25 @@ defaultDriver = webdriver.Chrome()
 pageData = {}
 
 
-class RowData:
-    def __init__(
-        cls,
-        serial,
-        date_filed,
-        nypuc_doctype,
-        name,
-        url,
-        organization,
-        itemNo,
-        file_name,
-        docket_id,
-    ):
-        cls.serial = serial
-        cls.date_filed = date_filed
-        cls.nypuc_doctype = nypuc_doctype
-        cls.name = name
-        cls.url = url
-        cls.organization = organization
-        cls.itemNo = itemNo
-        cls.docket_id = docket_id
-        cls.file_name = file_name
+class RowData(BaseModel):
+    serial: str
+    date_filed: str
+    nypuc_doctype: str
+    name: str
+    url: str
+    organization: str
+    itemNo: str
+    file_name: str
+    docket_id: str
 
-    def __str__(cls):
-        return f"\n(\n\tSerial: {cls.serial}\n\tDate Filed: {cls.date_filed}\
-        \n\tNY PUC Doc Type: {cls.nypuc_doctype}\n\tName: {cls.name}\n\tURL: \
-        {cls.url}\nOrganization: {cls.organization}\n\tItem No: {cls.itemNo}\n\
-        \tFile Name: {cls.file_name}\n)\n"
+    def __str__(self):
+        return f"\n(\n\tSerial: {self.serial}\n\tDate Filed: {self.date_filed}\
+        \n\tNY PUC Doc Type: {self.nypuc_doctype}\n\tName: {self.name}\n\tURL: \
+        {self.url}\nOrganization: {self.organization}\n\tItem No: {self.itemNo}\n\
+        \tFile Name: {self.file_name}\n)\n"
 
-    def __repr__(cls):
-        return f"\n(\n\tSerial: {cls.serial}\n\tDate Filed: {cls.date_filed}\
-        \n\tNY PUC Doc Type: {cls.nypuc_doctype}\n\tName: {cls.name}\n\tURL: \
-        {cls.url}\nOrganization: {cls.organization}\n\tItem No: {cls.itemNo}\n\
-        \tFile Name: {cls.file_name}\n)\n"
+    def __repr__(self):
+        return self.__str__()
 
 
 class FilingObject(BaseModel):
