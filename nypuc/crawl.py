@@ -117,7 +117,7 @@ def process_filing_object(filing_object):
     # assert (
     #     False
     # ), "Everything was successfull, not processing the file out of an abundance of caution"
-    filings = filing_object["filings"]
+    filings = filing_object.filings
     api_url = (
         "https://thaum.kessler.xyz/v1/process-scraped-doc/ny-puc/list?priority=false"
     )
