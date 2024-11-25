@@ -121,7 +121,8 @@ def process_filing_object(filing_object):
     api_url = (
         "https://thaum.kessler.xyz/v1/process-scraped-doc/ny-puc/list?priority=false"
     )
-    response = requests.post(api_url, json=filings)
+    jsonable_filings = [file.dict() for file in filings]
+    response = requests.post(api_url, json=jsonable_filings)
     if response.status_code != 201:
         raise Exception(
             f"Failed to process filing object. Status code: {response.status_code}, Response: {response.text}"
