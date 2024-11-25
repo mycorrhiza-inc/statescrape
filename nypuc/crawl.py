@@ -1,3 +1,4 @@
+from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
@@ -10,6 +11,10 @@ from urllib.parse import urlparse, parse_qs
 from typing import List, Optional
 import time
 import json
+
+from pydantic import BaseModel
+
+import os
 
 defaultDriver = webdriver.Chrome()
 
@@ -52,9 +57,11 @@ class RowData:
         \tFile Name: {cls.file_name}\n)\n"
 
 
-# class FilingObject(BaseModel):
-#     case : str
-#     filings: List[RowData]
+class FilingObject(BaseModel):
+    filing_id: str
+    filings: List[RowData]
+
+
 def extractRows(driver, graph, case):
     table = driver.find_element(By.ID, "tblPubDoc")
     body = table.find_element(By.TAG_NAME, "tbody")
@@ -150,6 +157,27 @@ def processURL(driver, url):
     all_links = [link.get_attribute("href") for link in links]
 
     return all_links
+
+
+def extract_all_recovered_filing_objects():
+    json_artifact_folder = Path("./json-artifacts/")
+
+    # Walk through all files in directory
+    for filename in os.listdir(json_artifact_folder):
+        if not filename.endswith(".json"):
+            continue
+
+        filepath = os.path.join(json_artifact_folder, filename)
+
+        try:
+            # Load JSON file
+            with open(filepath, "r") as f:
+                filing_data = FilingObject.model_validate_json(f.read())
+                # Verify and process if valid
+                process_filing_object(filing_data)
+
+        except Exception as e:
+            print(f"Error processing {filename}: {str(e)}")
 
 
 # caseLoaded = "<div id=\"GridPlaceHolder_upUpdatePanelGrd\" \
@@ -325,44 +353,47 @@ def get_all_cases_from_json(
 
 
 if __name__ == "__main__":
-    # test : "22-M-0149"
-    parser = argparse.ArgumentParser(
-        description="selenium based \
-                                     NYPUC case parser"
-    )
-    # Add flags/arguments
-    parser.add_argument("-o", "--output", type=str, help="json file to save the data")
-    parser.add_argument("-i", "--input", type=str, help="Specify the input cases")
-    parser.add_argument("-c", "--cases", type=str, help="comma separated list of cases")
+    extract_all_recovered_filing_objects()
 
-    # Parse the arguments
-    args = parser.parse_args()
-
-    # Use the flags in your script
-
-    graph = SiteGraph()
-    # cases = ["22-M-0645"]
-    cases = get_all_cases_from_json(
-        input_filename="output_cases.json",
-        exclude_cases_filename="already_processed.jso n",
-        after_number=0,
-    )
-
-    # Already processed 24-E-0165 22-M-0645 18-E-0138
-    # To process:
-    # if args.cases:
-    #     caseCodes = args.cases.split(',')
-    #     for cc in caseCodes:
-    #         cases.append(
-    #             f"https://documents.dps.ny.gov/public/MatterManagement/CaseMaster.aspx?MatterCaseNo={cc}")
-    #     graph.Seed(cases)
-
-    for case in cases:
-        graph.addLink(
-            f"https://documents.dps.ny.gov/public/MatterManagement/CaseMaster.aspx?MatterCaseNo={case}"
-        )
-
-    graph.Crawl()
-
-    if args.output:
-        graph.SaveSiteState(args.output)
+# if __name__ == "__main__":
+#     # test : "22-M-0149"
+#     parser = argparse.ArgumentParser(
+#         description="selenium based \
+#                                      NYPUC case parser"
+#     )
+#     # Add flags/arguments
+#     parser.add_argument("-o", "--output", type=str, help="json file to save the data")
+#     parser.add_argument("-i", "--input", type=str, help="Specify the input cases")
+#     parser.add_argument("-c", "--cases", type=str, help="comma separated list of cases")
+#
+#     # Parse the arguments
+#     args = parser.parse_args()
+#
+#     # Use the flags in your script
+#
+#     graph = SiteGraph()
+#     # cases = ["22-M-0645"]
+#     cases = get_all_cases_from_json(
+#         input_filename="output_cases.json",
+#         exclude_cases_filename="already_processed.jso n",
+#         after_number=0,
+#     )
+#
+#     # Already processed 24-E-0165 22-M-0645 18-E-0138
+#     # To process:
+#     # if args.cases:
+#     #     caseCodes = args.cases.split(',')
+#     #     for cc in caseCodes:
+#     #         cases.append(
+#     #             f"https://documents.dps.ny.gov/public/MatterManagement/CaseMaster.aspx?MatterCaseNo={cc}")
+#     #     graph.Seed(cases)
+#
+#     for case in cases:
+#         graph.addLink(
+#             f"https://documents.dps.ny.gov/public/MatterManagement/CaseMaster.aspx?MatterCaseNo={case}"
+#         )
+#
+#     graph.Crawl()
+#
+#     if args.output:
+#         graph.SaveSiteState(args.output)
