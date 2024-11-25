@@ -43,7 +43,7 @@ class RowData(BaseModel):
 
 
 class FilingObject(BaseModel):
-    filing_id: str
+    case: str
     filings: List[RowData]
 
 
