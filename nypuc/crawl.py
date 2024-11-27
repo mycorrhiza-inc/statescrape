@@ -47,6 +47,33 @@ class FilingObject(BaseModel):
     filings: List[RowData]
 
 
+class DocketInfo(BaseModel):
+    docket_id: str  # 24-C-0663
+    matter_type: str  # Complaint
+    matter_subtype: str  # Appeal of an Informal Hearing Decision
+    title: str  # In the Matter of the Rules and Regulations of the Public Service
+    organization: str  # Individual
+
+
+def verify_docket_id(docket: DocketInfo):
+
+    obj = {
+        "docket_id": docket.docket_id,
+        "name": docket.title,
+        "description": str(docket.model_dump_json()),
+    }
+    api_url = "https://api.kessler.xyz/v2/public/conversations/verify"
+
+    response = requests.post(api_url, json=obj)
+
+    if response.status_code != 200:
+        raise Exception(
+            f"Failed to verify docket ID. Status code: {response.status_code}\nResponse:\n{response.text}"
+        )
+
+    return response.json()
+
+
 def extractRows(driver, graph, case):
     table = driver.find_element(By.ID, "tblPubDoc")
     body = table.find_element(By.TAG_NAME, "tbody")
@@ -98,21 +125,6 @@ def save_filing_object(filing_object, filename: Optional[str] = None):
         json.dump(filing_object, f)
 
 
-def verify_docket_id(docket_id: str):
-
-    obj = {"docket_id": docket_id}
-    api_url = "https://api.kessler.xyz/v2/public/conversations/verify"
-
-    response = requests.post(api_url, json=obj)
-
-    if response.status_code != 200:
-        raise Exception(
-            f"Failed to verify docket ID. Status code: {response.status_code}\nResponse:\n{response.text}"
-        )
-
-    return response.json()
-
-
 def process_filing_object(filing_object):
     # assert (
     #     False
@@ -130,9 +142,9 @@ def process_filing_object(filing_object):
 
 
 def save_process_filing_object(filing_object, filename: Optional[str] = None):
-    save_filing_object(filing_object, filename)
+    # save_filing_object(filing_object, filename)
     verify_docket_id(filing_object["case"])
-    process_filing_object(filing_object)
+    # process_filing_object(filing_object)
 
 
 def processURL(driver, url):
