@@ -106,7 +106,7 @@ def process_docket_file(input_path: str, output_path: str) -> None:
     docket_infos = extract_docket_info(html_content)
 
     # Convert to list of dictionaries for JSON serialization
-    docket_dicts = [docket.dict() for docket in docket_infos]
+    docket_dicts = [docket.model_dump() for docket in docket_infos]
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(docket_dicts, f, indent=2)
