@@ -52,6 +52,7 @@ class DocketInfo(BaseModel):
     matter_subtype: str  # Appeal of an Informal Hearing Decision
     title: str  # In the Matter of the Rules and Regulations of the Public Service
     organization: str  # Individual
+    date_filed: str
 
 
 def extract_docket_info(html_content: str) -> List[DocketInfo]:
@@ -78,11 +79,12 @@ def extract_docket_info(html_content: str) -> List[DocketInfo]:
                     docket_id=cells[0].find("a").text.strip(),
                     matter_type=cells[1].text.strip(),
                     matter_subtype=cells[2].text.strip(),
+                    date_filed=cells[3].text.strip(),
                     title=cells[4].text.strip(),
                     organization=cells[5].text.strip(),
                 )
                 docket_infos.append(docket_info)
-            except (AttributeError, IndexError) as e:
+            except Exception as e:
                 # Skip malformed rows
                 print(f"Error processing row: {e}")
                 continue
