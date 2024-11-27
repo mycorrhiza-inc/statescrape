@@ -53,6 +53,7 @@ class DocketInfo(BaseModel):
     matter_subtype: str  # Appeal of an Informal Hearing Decision
     title: str  # In the Matter of the Rules and Regulations of the Public Service
     organization: str  # Individual
+    date_filed: str  # 12/13/2022
 
 
 def verify_docket_id(docket: DocketInfo):
@@ -60,6 +61,7 @@ def verify_docket_id(docket: DocketInfo):
     obj = {
         "docket_id": docket.docket_id,
         "name": docket.title,
+        "state": "ny",
         "description": str(docket.model_dump_json()),
     }
     api_url = "https://api.kessler.xyz/v2/public/conversations/verify"
@@ -72,6 +74,17 @@ def verify_docket_id(docket: DocketInfo):
         )
 
     return response.json()
+
+
+def verify_all_docket_ids(filename: str):
+    with open(filename, "r") as f:
+        initial_file_list = json.load(f)
+    for obj in initial_file_list:
+        try:
+            docket = DocketInfo.model_validate(obj)
+            verify_docket_id(docket)
+        except Exception as e:
+            print(f"Error verifying docket ID: {obj['docket_id']} encountered: {e}\n")
 
 
 def extractRows(driver, graph, case):
@@ -351,7 +364,8 @@ def get_all_cases_from_json(
 
 
 if __name__ == "__main__":
-    extract_all_recovered_filing_objects()
+    verify_all_docket_ids("output_cases.json")
+    # extract_all_recovered_filing_objects()
 
 # if __name__ == "__main__":
 #     # test : "22-M-0149"
