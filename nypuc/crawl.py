@@ -16,6 +16,11 @@ from pydantic import BaseModel
 
 import os
 
+import aiohttp
+
+import asyncio
+
+
 defaultDriver = webdriver.Chrome()
 
 pageData = {}
@@ -56,35 +61,50 @@ class DocketInfo(BaseModel):
     date_filed: str  # 12/13/2022
 
 
-def verify_docket_id(docket: DocketInfo):
-
+async def verify_docket_id(docket: DocketInfo):
     obj = {
         "docket_id": docket.docket_id,
         "name": docket.title,
         "state": "ny",
         "description": str(docket.model_dump_json()),
     }
-    api_url = "https://api.kessler.xyz/v2/public/conversations/verify"
+    api_url = "http://localhost/v2/public/conversations/verify"
 
-    response = requests.post(api_url, json=obj)
+    print(f"Verifying docket ID {docket.docket_id}")
+    async with aiohttp.ClientSession() as session:
+        async with session.post(api_url, json=obj) as response:
+            if response.status != 200:
+                print(f"Failed verification for docket ID {docket.docket_id}")
+                raise Exception(
+                    f"Failed to verify docket ID. Status code: {response.status}\nResponse:\n{await response.text()}"
+                )
 
-    if response.status_code != 200:
-        raise Exception(
-            f"Failed to verify docket ID. Status code: {response.status_code}\nResponse:\n{response.text}"
-        )
-
-    return response.json()
+            print(
+                f"Successfully verified docket ID {docket.docket_id}: \n Response: {await response.text()}\n"
+            )
+            return await response.json()
 
 
-def verify_all_docket_ids(filename: str):
+async def verify_all_docket_ids(filename: str):
     with open(filename, "r") as f:
         initial_file_list = json.load(f)
-    for obj in initial_file_list:
-        try:
-            docket = DocketInfo.model_validate(obj)
-            verify_docket_id(docket)
-        except Exception as e:
-            print(f"Error verifying docket ID: {obj['docket_id']} encountered: {e}\n")
+    promises = []
+    batch_size = 100
+
+    for i in range(0, len(initial_file_list), batch_size):
+        batch = initial_file_list[i : i + batch_size]
+        batch_promises = []
+
+        for obj in batch:
+            try:
+                docket = DocketInfo.model_validate(obj)
+                batch_promises.append(verify_docket_id(docket))
+            except Exception as e:
+                print(
+                    f"Error verifying docket ID: {obj['docket_id']} encountered: {e}\n"
+                )
+
+        await asyncio.gather(*batch_promises)
 
 
 def extractRows(driver, graph, case):
@@ -364,7 +384,7 @@ def get_all_cases_from_json(
 
 
 if __name__ == "__main__":
-    verify_all_docket_ids("output_cases.json")
+    asyncio.run(verify_all_docket_ids("output_cases.json"))
     # extract_all_recovered_filing_objects()
 
 # if __name__ == "__main__":
