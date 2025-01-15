@@ -175,26 +175,50 @@ def extract_docket_info(html_content: str, industry_affected: str) -> List[Docke
     return docket_infos
 
 
-def process_docket_file(input_path: str, output_path: str) -> None:
-    """
-        Process HTML file to extract complete docket information and save to JSON
-    >>>>>>> Snippet
+# Example usage:
+if __name__ == "__main__":
+    # Scrape all dockets
+    all_dockets = get_all_dockets()
 
-        Args:
-            input_path (str): Path to input HTML file
-            output_path (str): Path to output JSON file
-    """
+    # Save to JSON file
+    save_dockets_to_json(all_dockets, "all_dockets.json")
 
-    with open(input_path, "r", encoding="utf-8") as f:
-        html_content = f.read()
+    # Print summary
+    print(f"Retrieved {len(all_dockets)} total dockets")
+    print(f"Date range: {all_dockets[-1].date_filed} to {all_dockets[0].date_filed}")
 
-    docket_infos = extract_docket_info(html_content)
+    # Print industry breakdown
+    industry_counts = {}
+    for docket in all_dockets:
+        industry_counts[docket.industry_affected] = (
+            industry_counts.get(docket.industry_affected, 0) + 1
+        )
 
-    # Convert to list of dictionaries for JSON serialization
-    docket_dicts = [docket.model_dump() for docket in docket_infos]
+    print("\nDockets by industry:")
+    for industry, count in sorted(industry_counts.items()):
+        print(f"{industry}: {count}")
 
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(docket_dicts, f, indent=2)
+
+# def process_docket_file(input_path: str, output_path: str) -> None:
+#     """
+#         Process HTML file to extract complete docket information and save to JSON
+#     >>>>>>> Snippet
+#
+#         Args:
+#             input_path (str): Path to input HTML file
+#             output_path (str): Path to output JSON file
+#     """
+#
+#     with open(input_path, "r", encoding="utf-8") as f:
+#         html_content = f.read()
+#
+#     docket_infos = extract_docket_info(html_content, "")
+#
+#     # Convert to list of dictionaries for JSON serialization
+#     docket_dicts = [docket.model_dump() for docket in docket_infos]
+#
+#     with open(output_path, "w", encoding="utf-8") as f:
+#         json.dump(docket_dicts, f, indent=2)
 
 
 # def extract_docket_details(html_content: str) -> List[Dict[str, str]]:
@@ -229,27 +253,3 @@ def process_docket_file(input_path: str, output_path: str) -> None:
 #                 docket_details.append(details)
 #
 #     return docket_details
-
-
-# Example usage:
-if __name__ == "__main__":
-    # Scrape all dockets
-    all_dockets = get_all_dockets()
-
-    # Save to JSON file
-    save_dockets_to_json(all_dockets, "all_dockets.json")
-
-    # Print summary
-    print(f"Retrieved {len(all_dockets)} total dockets")
-    print(f"Date range: {all_dockets[-1].date_filed} to {all_dockets[0].date_filed}")
-
-    # Print industry breakdown
-    industry_counts = {}
-    for docket in all_dockets:
-        industry_counts[docket.industry_affected] = (
-            industry_counts.get(docket.industry_affected, 0) + 1
-        )
-
-    print("\nDockets by industry:")
-    for industry, count in sorted(industry_counts.items()):
-        print(f"{industry}: {count}")
