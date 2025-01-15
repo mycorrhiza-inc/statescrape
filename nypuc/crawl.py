@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -60,7 +63,6 @@ class DocketInfo(BaseModel):
     title: str  # In the Matter of the Rules and Regulations of the Public Service
     organization: str  # Individual
     date_filed: str  # 12/13/2022
-    description: str
 
 
 async def verify_docket_id(docket: DocketInfo):
@@ -68,12 +70,14 @@ async def verify_docket_id(docket: DocketInfo):
         "docket_gov_id": docket.docket_id,
         "state": "ny",
         "name": docket.title,
-        "description": docket.description,
+        "description": "",
         "matter_type": docket.matter_type,
         "industry_type": docket.industry_affected,
         "metadata": str(docket.model_dump_json()),
         "extra": "",
-        "date_published": docket.date_filed,
+        "date_published": datetime.strptime(docket.date_filed, "%m/%d/%Y").strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        ),
     }
     api_url = "http://localhost/v2/public/conversations/verify"
 
@@ -391,7 +395,7 @@ def get_all_cases_from_json(
 
 
 if __name__ == "__main__":
-    asyncio.run(verify_all_docket_ids("output_cases.json"))
+    asyncio.run(verify_all_docket_ids("all_dockets.json"))
     # extract_all_recovered_filing_objects()
 
 # if __name__ == "__main__":
