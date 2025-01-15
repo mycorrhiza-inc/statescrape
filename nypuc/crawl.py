@@ -56,17 +56,24 @@ class DocketInfo(BaseModel):
     docket_id: str  # 24-C-0663
     matter_type: str  # Complaint
     matter_subtype: str  # Appeal of an Informal Hearing Decision
+    industry_affected: str
     title: str  # In the Matter of the Rules and Regulations of the Public Service
     organization: str  # Individual
     date_filed: str  # 12/13/2022
+    description: str
 
 
 async def verify_docket_id(docket: DocketInfo):
     obj = {
-        "docket_id": docket.docket_id,
-        "name": docket.title,
+        "docket_gov_id": docket.docket_id,
         "state": "ny",
-        "description": str(docket.model_dump_json()),
+        "name": docket.title,
+        "description": docket.description,
+        "matter_type": docket.matter_type,
+        "industry_type": docket.industry_affected,
+        "metadata": str(docket.model_dump_json()),
+        "extra": "",
+        "date_published": docket.date_filed,
     }
     api_url = "http://localhost/v2/public/conversations/verify"
 
