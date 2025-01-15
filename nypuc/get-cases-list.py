@@ -75,7 +75,7 @@ def get_all_dockets() -> List[DocketInfo]:
 
             try:
                 # Wait for the industry affected label to be present
-                wait = WebDriverWait(driver, 30)
+                wait = WebDriverWait(driver, 300)
                 industry_elem = wait.until(
                     EC.presence_of_element_located(
                         (By.ID, "GridPlaceHolder_lblSearchCriteriaValue")
@@ -87,6 +87,7 @@ def get_all_dockets() -> List[DocketInfo]:
                 industry_affected = industry_text.replace(
                     "Industry Affected:", ""
                 ).strip()
+                time.sleep(30)
 
                 # Wait for table to load
                 table_elem = wait.until(
